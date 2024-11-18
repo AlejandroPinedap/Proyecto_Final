@@ -94,9 +94,9 @@ public class Main {
             boolean continuar = true;
             while (continuar) {
                 if (empleadoActual.esAdministrador()) {
-                    mostrarMenuAdministrador(scanner); // Menú de administrador
+                    continuar = mostrarMenuAdministrador(scanner); // Menú de administrador
                 } else if (empleadoActual.esEmpleado()) {
-                    mostrarMenuEmpleado(scanner); // Menú de empleado
+                    continuar = mostrarMenuEmpleado(scanner); // Menú de empleado
                 } else {
                     System.out.println("Error: Tipo de usuario no reconocido.");
                     continuar = false;
@@ -108,7 +108,7 @@ public class Main {
     }
 
     // Menú para administrador
-    private static void mostrarMenuAdministrador(Scanner scanner) {
+    private static boolean mostrarMenuAdministrador(Scanner scanner) {
         boolean continuar = true;
         while (continuar) {
             System.out.println("\n--- Menú Administrador ---");
@@ -140,14 +140,14 @@ public class Main {
                     break;
                 case 6:
                     System.out.println("Saliendo...");
-                    continuar = false;
+                    continuar = false; // Salir del bucle
                     break;
                 default:
                     System.out.println("Opción no válida.");
             }
         }
+        return continuar; // Devuelve false para indicar que se ha salido
     }
-    
     private static void recuperarContrasena(Scanner scanner) {
         System.out.print("Ingrese su ID de usuario: ");
         String idUsuario = scanner.nextLine();
@@ -240,16 +240,16 @@ public class Main {
         System.out.println("Empleado registrado exitosamente.");
     }
 
-    private static void mostrarMenuEmpleado(Scanner scanner) {
+    private static boolean mostrarMenuEmpleado(Scanner scanner) {
         boolean continuar = true;
-
+    
         // Verificar si el empleado está activo
         Empleado empleado = (Empleado) empleadoActual; // Hacemos el casting a Empleado
         if (!empleado.isActivo()) {
             System.out.println("El empleado está inactivo y no puede realizar ninguna acción.");
-            return; // Salir si el empleado está inactivo
+            return false; // Salir si el empleado está inactivo
         }
-
+    
         while (continuar) {
             System.out.println("\n--- Menú ---");
             System.out.println("1. Registrar vehículo");
@@ -262,7 +262,7 @@ public class Main {
             System.out.print("Seleccione una opción: ");
             int opcion = scanner.nextInt();
             scanner.nextLine(); // Limpiar el buffer
-
+    
             switch (opcion) {
                 case 1:
                     registrarVehiculo(scanner);
@@ -283,13 +283,14 @@ public class Main {
                     verTransacciones();
                     break;
                 case 7:
-                    continuar = false;
+                    continuar = false; // Salir del bucle
                     System.out.println("Saliendo de la aplicación.");
                     break;
                 default:
                     System.out.println("Opción no válida.");
             }
         }
+        return continuar; // Devuelve false para indicar que se ha salido
     }
 
     private static void registrarVehiculo(Scanner scanner) {
@@ -937,7 +938,29 @@ public class Main {
     }
 
     private static void comprarVehiculo() {
-        
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Ingrese el ID del cliente: ");
+        String idCliente = scanner.nextLine();
+        System.out.print("Ingrese la marca del vehículo a comprar: ");
+        String marcaVehiculo = scanner.nextLine();
+    
+        Cliente cliente = buscarClientePorId(idCliente);
+        Vehiculo vehiculo = buscarVehiculoPorMarca(marcaVehiculo);
+    
+        if (cliente != null && vehiculo != null) {
+            double monto = vehiculo.getPrecio(); // Obtener el precio del vehículo
+            Transaccion transaccion = new Transaccion(empleadoActual, vehiculo, cliente, TipoTransaccion.COMPRA,
+                    new Date(), monto); // Pasar el monto a la transacción
+            transacciones.add(transaccion);
+            System.out.println("Compra registrada: " + transaccion);
+        } else {
+            if (cliente == null) {
+                System.out.println("Cliente no encontrado.");
+            }
+            if (vehiculo == null) {
+                System.out.println("Vehículo no encontrado.");
+            }
+        }
     }
 
     private static void verTransacciones() {
